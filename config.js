@@ -1,5 +1,5 @@
 const CONFIG = {
     URL: 'https://vytkrwntfmxnnjedsfid.supabase.co';
-    KEY: 'sb_publishable_Zk3NmfBMjSDOwC1oSY77nA_uwZBC7s5';
+    KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5dGtyd250Zm14bm5qZWRzZmlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNzU5NzEsImV4cCI6MjA5Mjg1MTk3MX0.mH7H0ZzoYHArewRZEgLRWp3Q_8ubAHMgA7VkekT5Kps';
 
 };
