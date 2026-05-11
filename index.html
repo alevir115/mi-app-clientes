@@ -36,13 +36,23 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN SUPABASE (Obtené esto en Project Settings > API)
+        // CONFIGURACIÓN DE CREDENCIALES
         const SUPABASE_URL = 'https://uabddcmlpmomffdrpavg.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhYmRkY21scG1vbWZmZHJwYXZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NzA1ODQsImV4cCI6MjA5MzQ0NjU4NH0.bnLf5TdKW8sOIadm4LU0SZlMbQgQOzp_q3l03KLnVbw';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // Inicialización correcta del cliente
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function cargarClientes() {
-            const { data, error } = await supabase.from('clientes').select('*').order('created_at', { ascending: false });
+            const { data, error } = await _supabase
+                .from('clientes')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (error) {
+                console.error("Error cargando:", error);
+                return;
+            }
             renderizar(data);
         }
 
@@ -56,33 +66,52 @@
                 domicilio: document.getElementById('domicilio').value
             };
 
-            // Validaciones básicas de tipo
-            if (!/^[a-zA-Z\s]+$/.test(cliente.nombre)) return alert("El nombre solo debe tener letras");
+            // Validación básica
+            if (!cliente.nombre || !cliente.apellido || !cliente.dni) {
+                return alert("Por favor, completa los campos obligatorios (Nombre, Apellido y DNI)");
+            }
 
-            const { error } = await supabase.from('clientes').insert([cliente]);
-            if (error) alert("Error: " + error.message);
-            else { location.reload(); }
+            const { error } = await _supabase.from('clientes').insert([cliente]);
+            
+            if (error) {
+                alert("Error al guardar: " + error.message);
+                console.error(error);
+            } else {
+                // Limpiar campos y recargar
+                document.querySelectorAll('input').forEach(i => i.value = '');
+                cargarClientes();
+                alert("Cliente guardado con éxito");
+            }
         }
 
         async function eliminarCliente(id) {
             if(confirm("¿Eliminar este cliente?")) {
-                await supabase.from('clientes').delete().eq('id', id);
+                const { error } = await _supabase.from('clientes').delete().eq('id', id);
+                if (error) alert("Error al eliminar");
                 cargarClientes();
             }
         }
 
         async function buscarClientes() {
             const term = document.getElementById('buscador').value;
-            const { data } = await supabase.from('clientes').select('*')
+            if (!term) {
+                cargarClientes();
+                return;
+            }
+            const { data } = await _supabase.from('clientes').select('*')
                 .or(`nombre.ilike.%${term}%,dni.ilike.%${term}%,cuit.ilike.%${term}%`);
             renderizar(data);
         }
 
         function renderizar(clientes) {
             const lista = document.getElementById('listaClientes');
+            if (!clientes || clientes.length === 0) {
+                lista.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-500">No hay clientes registrados</td></tr>';
+                return;
+            }
             lista.innerHTML = clientes.map(c => `
                 <tr class="border-t">
-                    <td class="p-4"><strong>${c.nombre} ${c.apellido}</strong><br><span class="text-sm text-gray-500">${c.telefono}</span></td>
+                    <td class="p-4"><strong>${c.nombre} ${c.apellido}</strong><br><span class="text-sm text-gray-500">${c.telefono || ''}</span></td>
                     <td class="p-4">${c.dni}</td>
                     <td class="p-4">${c.cuit}</td>
                     <td class="p-4"><button onclick="eliminarCliente(${c.id})" class="text-red-500 hover:underline">Eliminar</button></td>
@@ -90,6 +119,7 @@
             `).join('');
         }
 
+        // Carga inicial
         cargarClientes();
     </script>
 </body>
