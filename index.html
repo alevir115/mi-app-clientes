@@ -3,45 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Clientes - Final</title>
+    <title>Gestión de Clientes - Producción</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-gray-50 p-8">
     <div class="max-w-4xl mx-auto">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6">Administrador de Clientes</h1>
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b-2 border-blue-500 pb-2">Sistema de Gestión de Clientes</h1>
         
-        <div class="bg-white p-6 rounded-lg shadow-md mb-6 grid grid-cols-2 gap-4 border-t-4 border-blue-600">
-            <h2 class="col-span-2 text-lg font-semibold text-gray-700">Nuevo Cliente</h2>
-            <input type="text" id="nombre" placeholder="Nombre" class="border p-2 rounded focus:ring-2 focus:ring-blue-400 outline-none">
-            <input type="text" id="apellido" placeholder="Apellido" class="border p-2 rounded focus:ring-2 focus:ring-blue-400 outline-none">
-            <input type="text" id="dni" placeholder="DNI" class="border p-2 rounded focus:ring-2 focus:ring-blue-400 outline-none">
-            <input type="number" id="telefono" placeholder="Teléfono" class="border p-2 rounded focus:ring-2 focus:ring-blue-400 outline-none">
-            <input type="text" id="cuit" placeholder="CUIT" class="border p-2 rounded focus:ring-2 focus:ring-blue-400 outline-none">
-            <input type="text" id="domicilio" placeholder="Domicilio" class="border p-2 rounded col-span-2 focus:ring-2 focus:ring-blue-400 outline-none">
-            <button onclick="agregarCliente()" class="bg-blue-600 text-white p-3 rounded col-span-2 hover:bg-blue-700 font-bold transition">Guardar Cliente</button>
-        </div>
-
-        <div class="bg-gray-100 p-4 rounded-lg mb-6 border-l-4 border-yellow-500 shadow-sm">
-            <button onclick="diagnostico()" class="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800 text-xs font-bold uppercase tracking-wider">
-                🔍 Test de Conexión (Debug)
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h2 class="col-span-full text-lg font-semibold text-blue-700">Registrar Nuevo Cliente</h2>
+            <input type="text" id="nombre" placeholder="Nombre" class="border p-2 rounded focus:border-blue-500 outline-none">
+            <input type="text" id="apellido" placeholder="Apellido" class="border p-2 rounded focus:border-blue-500 outline-none">
+            <input type="text" id="dni" placeholder="DNI" class="border p-2 rounded focus:border-blue-500 outline-none">
+            <input type="number" id="telefono" placeholder="Teléfono" class="border p-2 rounded focus:border-blue-500 outline-none">
+            <input type="text" id="cuit" placeholder="CUIT" class="border p-2 rounded focus:border-blue-500 outline-none">
+            <input type="text" id="domicilio" placeholder="Domicilio completo" class="border p-2 rounded md:col-span-2 focus:border-blue-500 outline-none">
+            <button onclick="agregarCliente()" class="bg-blue-600 text-white p-3 rounded md:col-span-2 hover:bg-blue-700 font-bold transition duration-200 shadow-md">
+                💾 Guardar en Base de Datos
             </button>
-            <div id="debug-log" class="mt-3 text-xs font-mono text-gray-700 bg-white p-2 rounded border hidden leading-relaxed"></div>
         </div>
 
-        <div class="relative mb-6">
+        <div class="bg-gray-800 p-4 rounded-lg mb-6 shadow-inner">
+            <div class="flex items-center justify-between">
+                <span class="text-gray-300 text-xs font-mono">Consola de Estado del Servidor</span>
+                <button onclick="diagnostico()" class="bg-yellow-500 text-gray-900 px-3 py-1 rounded text-xs font-bold hover:bg-yellow-400">
+                    EJECUTAR DIAGNÓSTICO
+                </button>
+            </div>
+            <div id="debug-log" class="mt-2 text-xs font-mono text-green-400 max-h-32 overflow-y-auto">
+                > Sistema listo. Presione el botón amarillo para testear conexión.
+            </div>
+        </div>
+
+        <div class="mb-6">
             <input type="text" id="buscador" oninput="buscarClientes()" placeholder="🔍 Buscar por DNI, Nombre o CUIT..." 
-                   class="w-full p-4 border rounded-xl shadow-sm focus:ring-2 focus:ring-blue-400 outline-none pl-12">
+                   class="w-full p-4 border-2 border-gray-200 rounded-xl shadow-sm focus:border-blue-400 outline-none">
         </div>
 
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
-            <table class="w-full text-left border-collapse">
-                <thead class="bg-gray-800 text-white">
+        <div class="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
+            <table class="w-full text-left">
+                <thead class="bg-gray-100 text-gray-700">
                     <tr>
-                        <th class="p-4 font-semibold">Cliente</th>
-                        <th class="p-4 font-semibold text-center">DNI</th>
-                        <th class="p-4 font-semibold text-center">CUIT</th>
-                        <th class="p-4 font-semibold text-center">Acciones</th>
+                        <th class="p-4 border-b">Datos del Cliente</th>
+                        <th class="p-4 border-b text-center">DNI / CUIT</th>
+                        <th class="p-4 border-b text-right">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="listaClientes" class="divide-y divide-gray-100">
@@ -51,48 +57,57 @@
     </div>
 
     <script>
-        // 1. CONFIGURACIÓN (REEMPLAZÁ CON TUS DATOS DE SUPABASE)
+        // --- CONFIGURACIÓN CRÍTICA ---
         const SUPABASE_URL = 'https://uabddcmlpmomffdrpavg.supabase.co'; 
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5dGtyd250Zm14bm5qZWRzZmlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNzU5NzEsImV4cCI6MjA5Mjg1MTk3MX0.mH7H0ZzoYHArewRZEgLRWp3Q_8ubAHMgA7VkekT5Kps'; // Pegá la clave que empieza con eyJ...
-
-        // Inicializamos el cliente (usamos _supabase para evitar conflictos)
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5dGtyd250Zm14bm5qZWRzZmlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNzU5NzEsImV4cCI6MjA5Mjg1MTk3MX0.mH7H0ZzoYHArewRZEgLRWp3Q_8ubAHMgA7VkekT5Kps';
+        
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // FUNCIÓN: CARGAR TODOS LOS CLIENTES
+        // FUNCIÓN: CARGAR CLIENTES
         async function cargarClientes() {
             const { data, error } = await _supabase
-                .from('clientes')
+                .from('clientes') // Nombre de la tabla verificado
                 .select('*')
                 .order('created_at', { ascending: false });
             
-            if (error) console.error("Error al cargar:", error);
+            if (error) {
+                document.getElementById('debug-log').innerHTML += `<br>❌ Error carga: ${error.message}`;
+            }
             renderizar(data || []);
         }
 
-        // FUNCIÓN: AGREGAR CLIENTE
+        // FUNCIÓN: AGREGAR
         async function agregarCliente() {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerHTML = "Procesando...";
+
             const cliente = {
                 nombre: document.getElementById('nombre').value.trim(),
                 apellido: document.getElementById('apellido').value.trim(),
                 dni: document.getElementById('dni').value.trim(),
-                telefono: parseInt(document.getElementById('telefono').value),
+                telefono: parseInt(document.getElementById('telefono').value) || 0,
                 cuit: document.getElementById('cuit').value.trim(),
                 domicilio: document.getElementById('domicilio').value.trim()
             };
 
             if (!cliente.nombre || !cliente.dni) {
-                return alert("Nombre y DNI son obligatorios.");
+                btn.disabled = false;
+                btn.innerHTML = "💾 Guardar en Base de Datos";
+                return alert("Faltan datos obligatorios (Nombre y DNI)");
             }
 
             const { error } = await _supabase.from('clientes').insert([cliente]);
             
             if (error) {
-                alert("Error de guardado: " + error.message);
+                alert("Error de Supabase: " + error.message);
             } else {
-                alert("✅ Cliente guardado con éxito");
-                limpiarFormulario();
+                alert("¡Cliente guardado correctamente!");
+                document.querySelectorAll('input:not(#buscador)').forEach(i => i.value = '');
                 cargarClientes();
             }
+            btn.disabled = false;
+            btn.innerHTML = "💾 Guardar en Base de Datos";
         }
 
         // FUNCIÓN: BUSCAR
@@ -100,84 +115,69 @@
             const term = document.getElementById('buscador').value;
             if (!term) return cargarClientes();
 
-            const { data, error } = await _supabase.from('clientes')
+            const { data } = await _supabase.from('clientes')
                 .select('*')
                 .or(`nombre.ilike.%${term}%,dni.ilike.%${term}%,cuit.ilike.%${term}%`);
             
-            if (!error) renderizar(data);
+            renderizar(data || []);
         }
 
         // FUNCIÓN: ELIMINAR
         async function eliminarCliente(id) {
-            if(confirm("¿Estás seguro de eliminar este cliente?")) {
+            if(confirm("¿Seguro que querés borrar este cliente?")) {
                 const { error } = await _supabase.from('clientes').delete().eq('id', id);
-                if (error) alert("No se pudo eliminar");
+                if (error) alert("Error al borrar");
                 cargarClientes();
             }
         }
 
-        // FUNCIÓN: RENDERIZAR TABLA
+        // FUNCIÓN: DIBUJAR TABLA
         function renderizar(clientes) {
             const lista = document.getElementById('listaClientes');
             if (clientes.length === 0) {
-                lista.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-400 italic">No se encontraron clientes</td></tr>';
+                lista.innerHTML = '<tr><td colspan="3" class="p-10 text-center text-gray-400 italic">No hay clientes registrados en la tabla "clientes"</td></tr>';
                 return;
             }
             lista.innerHTML = clientes.map(c => `
-                <tr class="hover:bg-blue-50 transition-colors">
-                    <td class="p-4">
-                        <div class="font-bold text-gray-800">${c.nombre} ${c.apellido}</div>
-                        <div class="text-xs text-gray-500">${c.telefono || 'Sin teléfono'}</div>
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="p-4 text-sm text-gray-800">
+                        <div class="font-bold uppercase text-blue-800">${c.nombre} ${c.apellido}</div>
+                        <div class="text-xs text-gray-500">Tel: ${c.telefono} | Domicilio: ${c.domicilio || 'N/A'}</div>
                     </td>
-                    <td class="p-4 text-center text-gray-600 font-mono">${c.dni}</td>
-                    <td class="p-4 text-center text-gray-600 font-mono">${c.cuit || '-'}</td>
-                    <td class="p-4 text-center">
-                        <button onclick="eliminarCliente(${c.id})" class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs hover:bg-red-200 font-bold transition">
-                            Eliminar
+                    <td class="p-4 text-center text-sm font-mono text-gray-600">
+                        DNI: ${c.dni}<br>CUIT: ${c.cuit || '-'}
+                    </td>
+                    <td class="p-4 text-right">
+                        <button onclick="eliminarCliente(${c.id})" class="text-red-500 text-xs font-bold hover:underline">
+                            ELIMINAR
                         </button>
                     </td>
                 </tr>
             `).join('');
         }
 
-        // FUNCIÓN: DIAGNÓSTICO (DEBUG)
+        // FUNCIÓN: DIAGNÓSTICO
         async function diagnostico() {
             const log = document.getElementById('debug-log');
-            log.classList.remove('hidden');
-            log.innerHTML = "⏳ Iniciando diagnóstico técnico...<br>";
-
-            try {
-                // Test de Variables
-                if (SUPABASE_KEY.includes('TU_KEY')) {
-                    log.innerHTML += "❌ <span class='text-red-600 font-bold'>ERROR:</span> No pegaste tu Key de Supabase en el código.<br>";
-                    return;
-                }
-                
-                log.innerHTML += "✅ Variables de configuración detectadas.<br>";
-                log.innerHTML += "📡 Intentando conectar a la base de datos...<br>";
-
-                const start = Date.now();
-                const { data, error, status } = await _supabase.from('clientes').select('count', { count: 'exact', head: true });
-                const end = Date.now();
-
-                if (error) {
-                    log.innerHTML += `❌ <span class='text-red-600 font-bold'>ERROR DE CONEXIÓN:</span> ${error.message}<br>`;
-                    log.innerHTML += `💡 Sugerencia: Revisa si la tabla se llama 'clientes' y si desactivaste el RLS (Row Level Security).<br>`;
-                } else {
-                    log.innerHTML += `✅ <span class='text-green-600 font-bold'>¡CONEXIÓN EXITOSA!</span><br>`;
-                    log.innerHTML += `⏱️ Tiempo de respuesta: ${end - start}ms<br>`;
-                    log.innerHTML += `📊 Estado: ${status} (OK)<br>`;
-                }
-            } catch (err) {
-                log.innerHTML += `❌ <span class='text-red-600 font-bold'>ERROR CRÍTICO:</span> ${err.message}<br>`;
+            log.innerHTML = "> Testeando llaves...<br>";
+            
+            if (SUPABASE_KEY.length < 50) {
+                log.innerHTML += "❌ ERROR: No pegaste la clave larga de Supabase.<br>";
+                return;
+            }
+            
+            log.innerHTML += "> Conectando a la tabla 'clientes'...<br>";
+            const { error, status } = await _supabase.from('clientes').select('id').limit(1);
+            
+            if (error) {
+                log.innerHTML += `❌ ERROR ${status}: ${error.message}<br>`;
+                log.innerHTML += `💡 REVISIÓN: ¿La tabla se llama exactamente 'clientes'? ¿Desactivaste el RLS?`;
+            } else {
+                log.innerHTML += `✅ ¡TODO OK! Tabla detectada y accesible (Status ${status})`;
             }
         }
 
-        function limpiarFormulario() {
-            document.querySelectorAll('input:not(#buscador)').forEach(input => input.value = '');
-        }
-
-        // Carga inicial al abrir la página
+        // Iniciar
         cargarClientes();
     </script>
 </body>
