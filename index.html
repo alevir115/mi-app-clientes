@@ -33,6 +33,7 @@
         <button onclick="cerrarApp()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded text-sm transition-colors">
   X Salir
 </button>
+        
 
         <div class="bg-gray-800 p-4 rounded-lg mb-6 shadow-inner">
             <div class="flex items-center justify-between">
@@ -67,6 +68,17 @@
     </div>
 
     <script>
+        // Asegúrate de que esto esté al principio de tus scripts
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof Neutralino !== 'undefined') {
+        Neutralino.init();
+        
+        // Opción B: Si la X sigue fallando, registramos el evento manualmente
+        Neutralino.events.on('windowClose', () => {
+            Neutralino.app.exit();
+        });
+    }
+});
         // Esto le avisa a Windows que la app ya cargó y activa la "X" y los botones
 Neutralino.init();
         // --- CONFIGURACIÓN CRÍTICA ---
