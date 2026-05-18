@@ -189,6 +189,15 @@
 
         // Iniciar
         cargarClientes();
+        function cerrarApp() {
+  // Verificamos si la app está corriendo dentro de Neutralino
+  if (typeof neu !== 'undefined' || typeof Neutralino !== 'undefined') {
+    Neutralino.app.exit();
+  } else {
+    // Si la abrís desde el navegador web común, solo te avisa
+    alert("Esta opción solo funciona en la versión de escritorio.");
+  }
+}
     </script>
 </body>
 </html>
